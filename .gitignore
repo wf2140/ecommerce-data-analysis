@@ -60,3 +60,13 @@ reports/*.md
 # OS
 Thumbs.db
 Desktop.ini
+
+# 学习文档
+   docs/
+   3-4天项目突击计划.md
+   数据导入模块面试要点.md
+   数据开发ETL开发面试全攻略.md
+   数据清洗模块对比分析.md
+   面试问题回答模板.md
+   项目进展与下一步计划.md
+   Git常用指令.md
