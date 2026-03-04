@@ -6,40 +6,43 @@
 """
 
 import pandas as pd
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
+import matplotlib
 import seaborn as sns
 import numpy as np
 import os
-
-# 设置中文字体
-import matplotlib.font_manager as fm
-
-# 尝试多个中文字体
-chinese_fonts = ['Microsoft YaHei', 'SimHei', 'SimSun', 'KaiTi', 'FangSong']
-available_fonts = [f.name for f in fm.fontManager.ttflist]
-
-# 找到可用的中文字体
-selected_font = None
-for font in chinese_fonts:
-    if font in available_fonts:
-        selected_font = font
-        break
-
-if selected_font:
-    plt.rcParams['font.sans-serif'] = [selected_font]
-    print(f"✅ 使用中文字体: {selected_font}")
-else:
-    print("⚠️  未找到中文字体，使用默认字体")
-    plt.rcParams['font.sans-serif'] = ['DejaVu Sans']
-
-plt.rcParams['axes.unicode_minus'] = False
 
 # 设置图表样式
 sns.set_style('whitegrid')
 plt.rcParams['figure.figsize'] = (14, 6)
 
+# 设置中文字体（必须在seaborn之后设置）
+import matplotlib.font_manager as fm
+
+# 获取字体路径
+font_path = None
+for font in fm.fontManager.ttflist:
+    if font.name == 'Microsoft YaHei':
+        font_path = font.fname
+        break
+
+if font_path:
+    # 添加字体到matplotlib
+    font_prop = fm.FontProperties(fname=font_path)
+    plt.rcParams['font.family'] = font_prop.get_name()
+    plt.rcParams['font.sans-serif'] = [font_prop.get_name()]
+    print(f"✅ 中文字体已加载: {font_prop.get_name()}")
+else:
+    print("⚠️ 未找到Microsoft YaHei字体，使用备用字体")
+    plt.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans']
+
+plt.rcParams['axes.unicode_minus'] = False
+
+# 强制seaborn使用中文字体
+sns.set(font=font_prop.get_name() if font_path else 'SimHei')
+
 # 确保charts目录存在
-os.makedirs('../charts', exist_ok=True)
+os.makedirs('charts', exist_ok=True)
 
 print("=" * 60)
 print("📊 开始生成可视化图表")
@@ -47,7 +50,7 @@ print("=" * 60)
 
 # 读取数据
 print("\n📁 读取数据...")
-df = pd.read_csv('../data/ecommerce_orders_clean.csv', encoding='latin1')
+df = pd.read_csv('data/ecommerce_orders_clean.csv', encoding='latin1', low_memory=False)
 df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
 print(f"✅ 数据加载成功: {len(df)} 条记录")
 
@@ -70,7 +73,7 @@ plt.ylabel('销售额(£)', fontsize=12)
 plt.xticks(range(len(monthly_sales)), monthly_sales['date_label'], rotation=45)
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
-plt.savefig('../charts/b图表1_月度销售趋势.png', dpi=300, bbox_inches='tight')
+plt.savefig('charts/b图表1_月度销售趋势.png', dpi=300, bbox_inches='tight')
 plt.close()
 print("✅ 图表1保存成功")
 
@@ -96,7 +99,7 @@ for bar in bars:
              ha='center', va='bottom', fontsize=9)
 plt.grid(True, alpha=0.3, axis='y')
 plt.tight_layout()
-plt.savefig('../charts/b图表2_城市销售对比.png', dpi=300, bbox_inches='tight')
+plt.savefig('charts/b图表2_城市销售对比.png', dpi=300, bbox_inches='tight')
 plt.close()
 print("✅ 图表2保存成功")
 
@@ -123,7 +126,7 @@ for i, bar in enumerate(bars):
              ha='left', va='center', fontsize=9)
 plt.grid(True, alpha=0.3, axis='x')
 plt.tight_layout()
-plt.savefig('../charts/b图表3_商品销量TOP10.png', dpi=300, bbox_inches='tight')
+plt.savefig('charts/b图表3_商品销量TOP10.png', dpi=300, bbox_inches='tight')
 plt.close()
 print("✅ 图表3保存成功")
 
@@ -160,7 +163,7 @@ wedges, texts, autotexts = plt.pie(category_sales['total_sales'], labels=categor
 plt.title('各类别销售占比', fontsize=16, fontweight='bold')
 plt.axis('equal')
 plt.tight_layout()
-plt.savefig('../charts/b图表4_各类别销售占比.png', dpi=300, bbox_inches='tight')
+plt.savefig('charts/b图表4_各类别销售占比.png', dpi=300, bbox_inches='tight')
 plt.close()
 print("✅ 图表4保存成功")
 
@@ -183,7 +186,7 @@ plt.axvline(median_val, color='green', linestyle='--', linewidth=2, label=f'中�
 plt.legend(fontsize=10)
 plt.grid(True, alpha=0.3, axis='y')
 plt.tight_layout()
-plt.savefig('../charts/b图表5_用户消费分布.png', dpi=300, bbox_inches='tight')
+plt.savefig('charts/b图表5_用户消费分布.png', dpi=300, bbox_inches='tight')
 plt.close()
 print("✅ 图表5保存成功")
 
@@ -196,7 +199,7 @@ city_data = df[df['Country'].isin(top_cities)]
 
 plt.figure(figsize=(14, 6))
 box_data = [city_data[city_data['Country'] == city]['TotalAmount'].values for city in top_cities]
-bp = plt.boxplot(box_data, labels=top_cities, patch_artist=True)
+bp = plt.boxplot(box_data, tick_labels=top_cities, patch_artist=True)
 for patch in bp['boxes']:
     patch.set_facecolor('lightblue')
 plt.title('各城市订单金额分布（TOP10）', fontsize=16, fontweight='bold')
@@ -205,7 +208,7 @@ plt.ylabel('订单金额(£)', fontsize=12)
 plt.xticks(rotation=45, ha='right')
 plt.grid(True, alpha=0.3, axis='y')
 plt.tight_layout()
-plt.savefig('../charts/b图表6_订单金额分布.png', dpi=300, bbox_inches='tight')
+plt.savefig('charts/b图表6_订单金额分布.png', dpi=300, bbox_inches='tight')
 plt.close()
 print("✅ 图表6保存成功")
 
@@ -220,6 +223,8 @@ weekly_sales = df.groupby(['week', 'weekday'])['TotalAmount'].sum().reset_index(
 weekly_pivot = weekly_sales.pivot(index='week', columns='weekday', values='TotalAmount')
 
 weekday_names = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+if len(weekly_pivot.columns) == 6:
+    weekday_names = weekday_names[:6]
 weekly_pivot.columns = weekday_names
 
 plt.figure(figsize=(14, 20))
@@ -228,7 +233,7 @@ plt.title('每周销售热力图', fontsize=16, fontweight='bold')
 plt.xlabel('星期', fontsize=12)
 plt.ylabel('周数', fontsize=12)
 plt.tight_layout()
-plt.savefig('../charts/b图表7_每周销售热力图.png', dpi=300, bbox_inches='tight')
+plt.savefig('charts/b图表7_每周销售热力图.png', dpi=300, bbox_inches='tight')
 plt.close()
 print("✅ 图表7保存成功")
 
@@ -261,14 +266,14 @@ for i, v in enumerate(user_type_sales['total_sales']):
     ax2.text(i, v, f'£{v/10000:.1f}万', ha='center', va='bottom', fontsize=10)
 
 plt.tight_layout()
-plt.savefig('../charts/b图表8_匿名用户vs注册用户.png', dpi=300, bbox_inches='tight')
+plt.savefig('charts/b图表8_匿名用户vs注册用户.png', dpi=300, bbox_inches='tight')
 plt.close()
 print("✅ 图表8保存成功")
 
 print("\n" + "=" * 60)
 print("🎉 所有图表生成完成!")
 print("=" * 60)
-print(f"图表保存位置: ../charts/")
+print(f"图表保存位置: charts/")
 print(f"生成的图表数量: 8张")
 print("\n图表列表:")
 print("1. b图表1_月度销售趋势.png")
