@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Data files (大文件建议忽略)
+data/*.csv
+data/*.xlsx
+data/*.json
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# Output files
+charts/*.png
+reports/*.md
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# Database
+*.db
+*.sqlite
+
+# OS
+Thumbs.db
+Desktop.ini
